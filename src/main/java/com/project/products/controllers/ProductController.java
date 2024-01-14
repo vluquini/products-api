@@ -40,7 +40,8 @@ public class ProductController {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
 //        }
 //        return ResponseEntity.status(HttpStatus.OK).body(obj.get());
-        return obj.<ResponseEntity<Object>>map(product -> ResponseEntity.status(HttpStatus.OK).body(product)).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found."));
+        return obj.<ResponseEntity<Object>>map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found."));
     }
 
     @PutMapping("/products/{id}")
@@ -50,8 +51,18 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
         }
         var productUpdated = obj.get();
-        BeanUtils.copyProperties(obj, productUpdated);
+        BeanUtils.copyProperties(productDto, productUpdated);
         return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(productUpdated));
+    }
+
+    @DeleteMapping("products/{id}")
+    public ResponseEntity<Object> deleteProduct(@PathVariable(value="id") UUID id){
+        Optional<Product> obj = repository.findById(id);
+        if (obj.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+        }
+        repository.delete(obj.get());
+        return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully.");
     }
 
 }
