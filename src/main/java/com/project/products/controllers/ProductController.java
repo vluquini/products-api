@@ -1,6 +1,5 @@
 package com.project.products.controllers;
 
-import com.fasterxml.jackson.annotation.OptBoolean;
 import com.project.products.dtos.ProductDto;
 import com.project.products.models.Product;
 import com.project.products.repositories.ProductRepository;
@@ -14,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class ProductController {
@@ -30,18 +32,25 @@ public class ProductController {
 
     @GetMapping("products")
     public ResponseEntity<List<Product>> getAllProducts(){
-        return ResponseEntity.status(HttpStatus.OK).body(repository.findAll());
+        List<Product> listProducts = repository.findAll();
+        if(!listProducts.isEmpty()){
+            for(Product product : listProducts){
+                // Esta linha poderia ser usada no método abaixo "getOneProductById"
+                UUID id = product.getIdProduct();
+                product.add(linkTo(methodOn(ProductController.class).getOneProductById(id)).withSelfRel());
+            }
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(listProducts);
     }
 
     @GetMapping("/products/{id}")
     public ResponseEntity<Object> getOneProductById(@PathVariable(value="id") UUID id){
         Optional<Product> obj = repository.findById(id);
-//        if (obj.isEmpty()){
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
-//        }
-//        return ResponseEntity.status(HttpStatus.OK).body(obj.get());
-        return obj.<ResponseEntity<Object>>map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
-                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found."));
+        if (obj.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+        }
+        obj.get().add(linkTo(methodOn(ProductController.class).getAllProducts()).withRel("Products List"));
+        return ResponseEntity.status(HttpStatus.OK).body(obj.get());
     }
 
     @PutMapping("/products/{id}")
