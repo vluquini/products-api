@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/products")
 public class ProductController {
     @Autowired
     private ProductRepository repository;
@@ -21,33 +22,33 @@ public class ProductController {
     private ProductService service;
 
     // o @Valid é necessário em conjunto com o @NotBlank e @NotNull nos records...
-    @PostMapping("/products")
+    @PostMapping
     public ResponseEntity<Product> saveProduct(@RequestBody @Valid ProductDto productDto){
         return service.saveProduct(productDto);
     }
 
-    @GetMapping("/products")
+    @GetMapping
     public ResponseEntity<List<Product>> getAllProducts(){
         return service.getAllProducts();
     }
 
-    @GetMapping("/products/filtered")
+    @GetMapping("/filtered")
     public ResponseEntity<List<Product>> getAllProductsFiltered(@RequestParam(name = "minValue", required = false) BigDecimal minValue,
                                                                 @RequestParam(name = "maxValue", required = false) BigDecimal maxValue){
         return service.getAllProductsFiltered(minValue, maxValue);
     }
 
-    @GetMapping("/products/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Object> getOneProductById(@PathVariable(value="id") UUID id){
         return service.getOneProductById(id);
     }
 
-    @PutMapping("/products/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Object> updateProduct(@PathVariable(value="id") UUID id, @RequestBody @Valid ProductDto productDto){
         return service.updateProduct(id, productDto);
     }
 
-    @DeleteMapping("/products/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteProduct(@PathVariable(value="id") UUID id){
         return service.deleteProduct(id);
     }

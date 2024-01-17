@@ -2,6 +2,7 @@ package com.project.products.services;
 
 import com.project.products.controllers.ProductController;
 import com.project.products.dtos.ProductDto;
+import com.project.products.exceptions.ProductNotFoundException;
 import com.project.products.models.Product;
 import com.project.products.repositories.ProductRepository;
 import org.springframework.beans.BeanUtils;
@@ -56,7 +57,7 @@ public class ProductService {
     public ResponseEntity<Object> getOneProductById(UUID id){
         Optional<Product> obj = repository.findById(id);
         if (obj.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+            throw new ProductNotFoundException();
         }
         obj.get().add(linkTo(methodOn(ProductController.class).getAllProducts()).withRel("Products List"));
         return ResponseEntity.status(HttpStatus.OK).body(obj.get());
@@ -65,7 +66,7 @@ public class ProductService {
     public ResponseEntity<Object> updateProduct(UUID id, ProductDto productDto){
         Optional<Product> obj = repository.findById(id);
         if (obj.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+            throw new ProductNotFoundException();
         }
         var productUpdated = obj.get();
         BeanUtils.copyProperties(productDto, productUpdated);
@@ -75,7 +76,7 @@ public class ProductService {
     public ResponseEntity<Object> deleteProduct(UUID id){
         Optional<Product> obj = repository.findById(id);
         if (obj.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+            throw new ProductNotFoundException();
         }
         repository.delete(obj.get());
         return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully.");
