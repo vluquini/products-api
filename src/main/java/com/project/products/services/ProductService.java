@@ -2,6 +2,7 @@ package com.project.products.services;
 
 import com.project.products.controllers.ProductController;
 import com.project.products.dtos.ProductDto;
+import com.project.products.exceptions.NoProductsFoundException;
 import com.project.products.exceptions.ProductNotFoundException;
 import com.project.products.models.Product;
 import com.project.products.repositories.ProductRepository;
@@ -32,24 +33,26 @@ public class ProductService {
 
     public ResponseEntity<List<Product>> getAllProducts(){
         List<Product> listProducts = repository.findAll();
-        if(!listProducts.isEmpty()){
-            for(Product product : listProducts){
-                // Esta linha poderia ser usada no método abaixo "getOneProductById"
-                UUID id = product.getIdProduct();
-                product.add(linkTo(methodOn(ProductController.class).getOneProductById(id)).withSelfRel());
-            }
+        if(listProducts.isEmpty()){
+            throw new NoProductsFoundException();
+        }
+        for(Product product : listProducts){
+            // Esta linha poderia ser usada no método abaixo "getOneProductById"
+            UUID id = product.getIdProduct();
+            product.add(linkTo(methodOn(ProductController.class).getOneProductById(id)).withSelfRel());
         }
         return ResponseEntity.status(HttpStatus.OK).body(listProducts);
     }
 
     public ResponseEntity<List<Product>> getAllProductsFiltered(BigDecimal minValue, BigDecimal maxValue) {
         List<Product> listProducts = repository.findByValueBetween(minValue, maxValue);
-        if(!listProducts.isEmpty()){
-            for(Product product : listProducts){
-                // Esta linha poderia ser usada no método abaixo "getOneProductById"
-                UUID id = product.getIdProduct();
-                product.add(linkTo(methodOn(ProductController.class).getOneProductById(id)).withSelfRel());
-            }
+        if(listProducts.isEmpty()) {
+            throw new NoProductsFoundException();
+        }
+        for(Product product : listProducts){
+            // Esta linha poderia ser usada no método abaixo "getOneProductById"
+            UUID id = product.getIdProduct();
+            product.add(linkTo(methodOn(ProductController.class).getOneProductById(id)).withSelfRel());
         }
         return ResponseEntity.status(HttpStatus.OK).body(listProducts);
     }

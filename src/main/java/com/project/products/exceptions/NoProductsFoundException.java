@@ -1,10 +1,10 @@
 package com.project.products.exceptions;
 
-public class ProductNotFoundException extends RuntimeException {
-    private static final String DEFAULT_ERROR_MESSAGE = "Product not found.";
-    private static final String DEFAULT_DETAILED_MESSAGE = "The requested product could not be found.";
+public class NoProductsFoundException extends RuntimeException {
+    private static final String DEFAULT_ERROR_MESSAGE = "No Products Found.";
+    private static final String DEFAULT_DETAILED_MESSAGE = "There are no products at this time.";
 
-    public ProductNotFoundException() {
+    public NoProductsFoundException() {
         super(DEFAULT_ERROR_MESSAGE);
     }
 
