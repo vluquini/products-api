@@ -8,6 +8,9 @@ import com.project.products.models.Product;
 import com.project.products.repositories.ProductRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,8 +34,8 @@ public class ProductService {
         return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(product));
     }
 
-    public ResponseEntity<List<Product>> getAllProducts(){
-        List<Product> listProducts = repository.findAll();
+    public ResponseEntity<Page<Product>> getAllProducts(Pageable pageable){
+        Page<Product> listProducts = repository.findAll(pageable);
         if(listProducts.isEmpty()){
             throw new NoProductsFoundException();
         }
@@ -59,10 +62,11 @@ public class ProductService {
 
     public ResponseEntity<Object> getOneProductById(UUID id){
         Optional<Product> obj = repository.findById(id);
+        Pageable defaultPageable = PageRequest.of(0, 10);
         if (obj.isEmpty()){
             throw new ProductNotFoundException();
         }
-        obj.get().add(linkTo(methodOn(ProductController.class).getAllProducts()).withRel("Products List"));
+        obj.get().add(linkTo(methodOn(ProductController.class).getAllProducts(defaultPageable)).withRel("Products List"));
         return ResponseEntity.status(HttpStatus.OK).body(obj.get());
     }
 
@@ -84,4 +88,5 @@ public class ProductService {
         repository.delete(obj.get());
         return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully.");
     }
+
 }
