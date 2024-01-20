@@ -9,7 +9,6 @@ import com.project.products.repositories.ProductRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,11 +61,11 @@ public class ProductService {
 
     public ResponseEntity<Object> getOneProductById(UUID id){
         Optional<Product> obj = repository.findById(id);
-        Pageable defaultPageable = PageRequest.of(0, 10);
+//        Pageable defaultPageable = PageRequest.of(0, 10);
         if (obj.isEmpty()){
             throw new ProductNotFoundException();
         }
-        obj.get().add(linkTo(methodOn(ProductController.class).getAllProducts(defaultPageable)).withRel("Products List"));
+        obj.get().add(linkTo(methodOn(ProductController.class).getAllProducts(null)).withRel("Products List"));
         return ResponseEntity.status(HttpStatus.OK).body(obj.get());
     }
 
