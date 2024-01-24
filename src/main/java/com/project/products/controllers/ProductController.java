@@ -12,11 +12,11 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Products Controller")
@@ -44,21 +44,9 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Produtos encontrados"),
             @ApiResponse(responseCode = "404", description = "Nenhum produto encontrado"),
     })
-    @GetMapping
-    public ResponseEntity<Page<Product>> getAllProducts(Pageable pageable){
+    @GetMapping  // @PageableDefault já contém algumas definições padronizadas (page = 0, size = 10...)
+    public ResponseEntity<Page<Product>> getAllProducts(@PageableDefault(sort = "name") Pageable pageable){
         return service.getAllProducts(pageable);
-    }
-
-    @Operation(summary = "Get all products by value filter", description = "Busca produtos dentro de uma faixa de valor", method = "POST")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Produtos encontrados"),
-            @ApiResponse(responseCode = "404", description = "Não há produtos nesta faixa de valor"),
-            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
-    })
-    @GetMapping("/filtered")
-    public ResponseEntity<List<Product>> getAllProductsFiltered(@RequestParam(name = "minValue", required = false) BigDecimal minValue,
-                                                                @RequestParam(name = "maxValue", required = false) BigDecimal maxValue){
-        return service.getAllProductsFiltered(minValue, maxValue);
     }
 
     @Operation(summary = "Get one product by ID", description = "Busca um produto pelo ID", method = "GET")
@@ -69,6 +57,26 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<Object> getOneProductById(@PathVariable(value="id") UUID id){
         return service.getOneProductById(id);
+    }
+
+    @GetMapping("/filter/byName")
+    public ResponseEntity<Page<Product>> getProductsByName(@RequestParam(name = "name") String name,
+                                                           @PageableDefault(sort = "name") Pageable pageable){
+        return service.getProductsByName(name, pageable);
+
+    }
+
+    @Operation(summary = "Get products by value filter", description = "Busca produtos dentro de uma faixa de valor", method = "POST")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Produtos encontrados"),
+            @ApiResponse(responseCode = "404", description = "Não há produtos nesta faixa de valor"),
+            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
+    })
+    @GetMapping("/filter/byValueRange")
+    public ResponseEntity<Page<Product>> getProductsByValueRange(@RequestParam(name = "minValue") BigDecimal minValue,
+                                                                 @RequestParam(name = "maxValue") BigDecimal maxValue,
+                                                                 @PageableDefault(sort = "name") Pageable pageable){
+        return service.getProductsByValueRange(minValue, maxValue, pageable);
     }
 
     @Operation(summary = "Update product by ID", description = "Atualiza um produto pelo ID", method = "PUT")
